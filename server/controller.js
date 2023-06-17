@@ -224,6 +224,9 @@ module.exports = {
             ('Yemen'),
             ('Zambia'),
             ('Zimbabwe');
+
+            INSERT INTO cities (name, rating)
+            VALUES ('Dallas', 1), ('Austin', 1), ('Houston', 3);
         `).then(() => {
             console.log('DB seeded!')
             res.sendStatus(200)
@@ -236,5 +239,41 @@ module.exports = {
         `).then((dbRes) => {
             res.status(200).send(dbRes[0])
         }).catch(err => console.log('error getting countries table', err))
+    },
+
+    getCities: (req, res) => {
+        sequelize.query(`
+            SELECT a.city_id, a.name AS city, a.rating, c.name AS country
+            FROM cities AS a
+            JOIN countries AS c
+            ON a.country_id = c.country_id
+            ORDER BY a.rating DESC;
+        `).then((dbRes) => {
+            res.status(200).send(dbRes[0])
+        }).catch(err => console.log('error getting cities', err))
+    },
+
+    createCity: (req, res) => {
+        let {
+            name,
+            rating,
+            countryId
+         } = req.body
+
+        sequelize.query(`
+            INSERT INTO cities (name, rating, country_id)
+            VALUES ('${name}', '${rating}', ${countryId})
+        `).then((dbRes) => {
+            res.status(200).send(dbRes[0])
+        }).catch(err => console.log('error inserting values', err))
+    },
+
+    deleteCity: (req, res) => {
+        let { id } = req.params
+        sequelize.query(`
+            DELETE FROM cities WHERE city_id = ${id}
+        `).then((dbRes) => {
+            res.status(200).send(dbRes[0])
+        }).catch(err => console.log('something is wrong', err))
     }
 }
